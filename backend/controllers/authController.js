@@ -8,13 +8,13 @@ const generateToken = (id) => {
 };
 
 const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { studentNumber, name, email, password, phone, campus } = req.body; //new
     try {
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-        const user = await User.create({ name, email, password });
-        res.status(201).json({ id: user.id, name: user.name, email: user.email, token: generateToken(user.id) });
+        const user = await User.create({ studentNumber, name, email, password, phone, campus }); //with ,?
+        res.status(201).json({ id: user.id, studentNumber: user.studentNumber, name: user.name, email: user.email, phone: user.phone, campus: user.campus, token: generateToken(user.id) });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -34,6 +34,7 @@ const loginUser = async (req, res) => {
     }
 };
 
+// name, email, password, studentNumber, phone, campus
 const getProfile = async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
@@ -42,10 +43,13 @@ const getProfile = async (req, res) => {
       }
   
       res.status(200).json({
+        studentNumber: user.studentNumber,
         name: user.name,
         email: user.email,
-        university: user.university,
-        address: user.address,
+        phone: user.phone,
+        campus: user.campus,
+        // university: user.university,
+        // address: user.address,
       });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
@@ -57,14 +61,17 @@ const updateUserProfile = async (req, res) => {
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        const { name, email, university, address } = req.body;
+        const { studentNumber, name, email, phone, campus } = req.body;
+        user.studentNumber = studentNumber || user.studentNumber;
         user.name = name || user.name;
         user.email = email || user.email;
-        user.university = university || user.university;
-        user.address = address || user.address;
+        user.phone = phone || user.phone;
+        user.campus = campus || user.campus;
+        // user.university = university || user.university;
+        // user.address = address || user.address;
 
         const updatedUser = await user.save();
-        res.json({ id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, university: updatedUser.university, address: updatedUser.address, token: generateToken(updatedUser.id) });
+        res.json({ id: updatedUser.id, studentNumber: updatedUser.studentNumber, name: updatedUser.name, email: updatedUser.email, phone: updatedUser.phone, campus: updatedUser.campus, token: generateToken(updatedUser.id) });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
