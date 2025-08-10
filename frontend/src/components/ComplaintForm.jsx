@@ -42,6 +42,7 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded mb-6">
       <h1 className="text-2xl font-bold mb-4">{editingComplaint ? 'Edit Complaint' : 'Create New Complaint'}</h1>
+      <label className="block text-gray-700 font-semibold mb-1">Title</label>
       <input
         type="text"
         placeholder="Title"
@@ -49,6 +50,7 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
         className="w-full mb-4 p-2 border rounded"
       />
+      <label className="block text-gray-700 font-semibold mb-1">Description</label>
       <input
         type="text"
         placeholder="Description"
@@ -56,6 +58,7 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         className="w-full mb-4 p-2 border rounded"
       />
+      <label className="block text-gray-700 font-semibold mb-1">Date the Issue Happened</label>
       <input
         type="date"
         value={formData.date}
