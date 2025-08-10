@@ -22,6 +22,7 @@ const ComplaintList = ({ complaints, setComplaints, setEditingComplaint }) => {
           <h2 className="font-bold">{complaint.title}</h2>
           <p>{complaint.description}</p>
           <p className="text-sm text-gray-500">Date: {new Date(complaint.date).toLocaleDateString()}</p>
+          <p className="text-sm text-gray-700">Status: {complaint.status || 'received'}</p> 
           <div className="mt-2">
             <button
               onClick={() => setEditingComplaint(complaint)}
