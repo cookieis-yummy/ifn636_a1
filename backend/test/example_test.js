@@ -20,7 +20,7 @@ describe('AddComplaint Function Test', () => {
     };
 
     // Mock complaint returned from model
-    const createdComplaint = { _id: new mongoose.Types.ObjectId(), ...req.body, userId: req.user.id };
+    const createdComplaint = { _id: new mongoose.Types.ObjectId(), userId: req.user.id, ...req.body, status: 'received'};
 
     // Stub create
     const createStub = sinon.stub(Complaint, 'create').resolves(createdComplaint);

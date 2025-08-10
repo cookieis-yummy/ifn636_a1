@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     // university: { type: String },
     // address: { type: String },
     phone: { type: String, required: true, trim: true },
-    campus: { type: String, required: true, enum: ['Gardens Point', 'Kelvin Grove'] },
+    campus: { type: String, required: true, enum: ['Garden Point', 'Kelvin Grove'] },
 
 }, { timestamps: true 
 });
