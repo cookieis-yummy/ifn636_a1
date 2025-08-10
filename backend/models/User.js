@@ -3,11 +3,16 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
+    studentNumber: { type: String, required: true, unique: true, trim: true },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    university: { type: String },
-    address: { type: String },
+    // university: { type: String },
+    // address: { type: String },
+    phone: { type: String, required: true, trim: true },
+    campus: { type: String, required: true, enum: ['Gardens Point', 'Kelvin Grove'] },
+
+}, { timestamps: true 
 });
 
 userSchema.pre('save', async function (next) {
