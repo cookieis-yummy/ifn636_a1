@@ -5,6 +5,18 @@
 
 import '@testing-library/jest-dom';
 
+// Mock AuthContext so components using useAuth() don’t crash in tests
+jest.mock('./context/AuthContext', () => ({
+  // Mock the hook
+  useAuth: () => ({
+    user: null,
+    login: jest.fn(),
+    logout: jest.fn(),
+  }),
+  // Mock the provider to just render children
+  AuthProvider: ({ children }) => children,
+}));
+
 // Mock axios for all tests to avoid importing ESM build from node_modules
 jest.mock('axios', () => {
   const mockInstance = {
