@@ -1,8 +1,8 @@
 const chai = require('chai');
 // const chaiHttp = require('chai-http');
-const http = require('http');
-const app = require('../server');
-const connectDB = require('../config/db');
+// const http = require('http');
+// const app = require('../server');
+// const connectDB = require('../config/db');
 const mongoose = require('mongoose');
 const sinon = require('sinon');
 const Complaint = require('../models/Complaint');
