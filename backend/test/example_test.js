@@ -1,5 +1,5 @@
 const chai = require('chai');
-const chaiHttp = require('chai-http');
+// const chaiHttp = require('chai-http');
 const http = require('http');
 const app = require('../server');
 const connectDB = require('../config/db');
@@ -9,7 +9,7 @@ const Complaint = require('../models/Complaint');
 const { updateComplaint, getComplaints, addComplaint, deleteComplaint } = require('../controllers/complaintController');
 const { expect } = chai;
 
-chai.use(chaiHttp);
+// chai.use(chaiHttp);
 
 describe('AddComplaint Function Test', () => {
   it('should create a new complaint successfully', async () => {
