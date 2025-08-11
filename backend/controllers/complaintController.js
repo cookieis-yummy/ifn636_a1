@@ -60,4 +60,68 @@ const deleteComplaint = async (req, res) => {
   }
 };
 
-module.exports = { getComplaints, addComplaint, updateComplaint, deleteComplaint };
+// List closed complaints 
+const getClosedComplaints = async (req, res) => {
+  try {
+    const complaints = await Complaint.find({
+      userId: req.user.id,
+      status: 'closed',
+    }).sort({ date: -1 });
+    res.json(complaints);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Save feedback 
+const saveFeedback = async (req, res) => {
+  try {
+    const { text, rating } = req.body;
+
+    const complaint = await Complaint.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+    if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
+
+    // Create subdoc if missing
+    complaint.feedback = complaint.feedback || {};
+
+    if (text !== undefined) {
+      complaint.feedback.text = String(text);
+    }
+
+    if (rating !== undefined) {
+      const num = Number(rating);
+      if (!Number.isInteger(num) || num < 1 || num > 5) {
+        return res.status(400).json({ message: 'Rating must be an integer between 1 and 5' });
+      }
+      complaint.feedback.rating = num;
+    }
+
+    const updated = await complaint.save();
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete feedback
+const deleteFeedback = async (req, res) => {
+  try {
+    const complaint = await Complaint.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+    if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
+
+    complaint.feedback = undefined;
+    const updated = await complaint.save();
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+module.exports = { getComplaints, addComplaint, updateComplaint, deleteComplaint, getClosedComplaints, saveFeedback, deleteFeedback, };

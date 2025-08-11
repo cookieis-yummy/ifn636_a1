@@ -11,6 +11,7 @@ const complaintSchema = new mongoose.Schema({
     enum: ['received', 'resolving', 'closed'],
     default: 'received',
   },
+  photos: [{ type: String }],
 });
 
 module.exports = mongoose.model('Complaint', complaintSchema);
