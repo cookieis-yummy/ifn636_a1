@@ -1,8 +1,12 @@
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
+import { useNavigate } from 'react-router-dom';
+
 
 const ComplaintList = ({ complaints, setComplaints, setEditingComplaint }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
 
   const handleDelete = async (complaintId) => {
     try {
@@ -23,25 +27,27 @@ const ComplaintList = ({ complaints, setComplaints, setEditingComplaint }) => {
           <p>{complaint.description}</p>
           <p className="text-sm text-gray-500">Date: {new Date(complaint.date).toLocaleDateString()}</p>
           <p className="text-sm text-gray-700">Status: {complaint.status || 'received'}</p> 
-          <div className="mt-2">
+          <div className="flex space-x-2 mt-2">
             <button
               onClick={() => setEditingComplaint(complaint)}
-              className="mr-2 bg-yellow-500 text-white px-4 py-2 rounded"
+              className="bg-yellow-500 text-white px-4 py-2 rounded w-24 text-center"
             >
               Edit
             </button>
             <button
               onClick={() => handleDelete(complaint._id)}
-              className="bg-red-500 text-white px-4 py-2 rounded"
+              className="bg-red-500 text-white px-4 py-2 rounded w-24 text-center"
             >
               Delete
             </button>
-            <button
-              onClick={() => navigate('/feedback')}
-              className="bg-indigo-600 text-white px-4 py-2 rounded"
-            >
-              Feedback
-            </button>
+            {complaint.status === 'closed' && (
+              <button
+                onClick={() => navigate('/feedback')}
+                className="bg-indigo-600 text-white px-4 py-2 rounded w-24 text-center"
+              >
+                Feedback
+              </button>
+            )}
           </div>
         </div>
       ))}

@@ -7,9 +7,8 @@ const Feedback = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [items, setItems] = useState([]);            // closed complaints
-  const [editing, setEditing] = useState({});        // { [id]: true/false }
-  const [drafts, setDrafts] = useState({});          // { [id]: { text, rating } }
+  const [items, setItems] = useState([]);   // closed complaints from API
+  const [drafts, setDrafts] = useState({}); // { [id]: { text, rating } }
   const [loading, setLoading] = useState(false);
 
   const fetchClosed = async () => {
@@ -18,17 +17,18 @@ const Feedback = () => {
       const res = await axiosInstance.get('/api/feedback', {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      setItems(res.data || []);
-      // seed drafts with current feedback values
+      const data = res.data || [];
+      setItems(data);
+      // seed drafts from server values
       const init = {};
-      (res.data || []).forEach(c => {
+      data.forEach((c) => {
         init[c._id] = {
           text: c.feedback?.text || '',
-          rating: c.feedback?.rating || '',
+          rating: c.feedback?.rating ?? '',
         };
       });
       setDrafts(init);
-    } catch (e) {
+    } catch {
       alert('Failed to load closed complaints.');
     } finally {
       setLoading(false);
@@ -40,29 +40,68 @@ const Feedback = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.token]);
 
-  const handleEdit = (id) => setEditing((s) => ({ ...s, [id]: true }));
-  const handleCancel = (id) => setEditing((s) => ({ ...s, [id]: false }));
-
   const handleDraftChange = (id, field, value) => {
     setDrafts((d) => ({ ...d, [id]: { ...d[id], [field]: value } }));
   };
 
+  const isDirty = (c) => {
+    const d = drafts[c._id] || {};
+    const baseText = c.feedback?.text || '';
+    const baseRating = c.feedback?.rating ?? '';
+    // compare as strings to avoid undefined vs '' weirdness
+    return String(d.text ?? '') !== String(baseText) ||
+           String(d.rating ?? '') !== String(baseRating);
+  };
+
+  const ratingValid = (val) => {
+    if (val === '' || val === undefined) return false;
+    const n = Number(val);
+    return Number.isInteger(n) && n >= 1 && n <= 5;
+  };
+
+  const canSave = (c) => {
+    const d = drafts[c._id] || {};
+    // Enable save if ANY change (text or rating) AND rating is empty-or-valid.
+    // If you want rating to be required, change `ratingValid` check accordingly.
+    const dirty = isDirty(c);
+    const ratingOk = d.rating === '' || ratingValid(d.rating);
+    return dirty && ratingOk;
+  };
+
   const handleSave = async (id) => {
+    const d = drafts[id] || {};
     try {
       const body = {
-        text: drafts[id]?.text ?? '',
-        rating: drafts[id]?.rating ? Number(drafts[id].rating) : undefined,
+        text: d.text ?? '',
+        rating: d.rating === '' ? undefined : Number(d.rating),
       };
       const res = await axiosInstance.put(`/api/feedback/${id}`, body, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      // Update local items with the updated complaint
+      // sync items
       setItems((arr) => arr.map((c) => (c._id === id ? res.data : c)));
-      // Lock edits
-      setEditing((s) => ({ ...s, [id]: false }));
+      // reset draft to saved values
+      setDrafts((prev) => ({
+        ...prev,
+        [id]: {
+          text: res.data.feedback?.text || '',
+          rating: res.data.feedback?.rating ?? '',
+        },
+      }));
     } catch {
       alert('Failed to save feedback.');
     }
+  };
+
+  const handleCancel = (c) => {
+    // revert draft back to server values
+    setDrafts((prev) => ({
+      ...prev,
+      [c._id]: {
+        text: c.feedback?.text || '',
+        rating: c.feedback?.rating ?? '',
+      },
+    }));
   };
 
   const handleDelete = async (id) => {
@@ -72,7 +111,6 @@ const Feedback = () => {
       });
       setItems((arr) => arr.map((c) => (c._id === id ? res.data : c)));
       setDrafts((d) => ({ ...d, [id]: { text: '', rating: '' } }));
-      setEditing((s) => ({ ...s, [id]: false }));
     } catch {
       alert('Failed to delete feedback.');
     }
@@ -99,8 +137,13 @@ const Feedback = () => {
         <div className="bg-white p-4 rounded shadow">No closed complaints yet.</div>
       ) : (
         items.map((c) => {
-          const isEditing = !!editing[c._id];
-          const draft = drafts[c._id] || { text: '', rating: '' };
+          const d = drafts[c._id] || { text: '', rating: '' };
+          const dirty = isDirty(c);
+          const saveEnabled = canSave(c);
+          const cancelEnabled = dirty;
+          const deleteEnabled = (drafts[c._id]?.text?.trim() || drafts[c._id]?.rating !== '');
+
+
           return (
             <div key={c._id} className="bg-white p-4 rounded shadow mb-4">
               <div className="mb-2">
@@ -111,9 +154,8 @@ const Feedback = () => {
               <div className="mb-2">
                 <label className="block text-sm font-medium mb-1">Your feedback</label>
                 <textarea
-                  value={draft.text}
+                  value={d.text}
                   onChange={(e) => handleDraftChange(c._id, 'text', e.target.value)}
-                  disabled={!isEditing}
                   className="w-full border rounded p-2"
                   rows={3}
                   placeholder="Write your feedback here…"
@@ -123,9 +165,8 @@ const Feedback = () => {
               <div className="mb-3">
                 <label className="block text-sm font-medium mb-1">Rating</label>
                 <select
-                  value={draft.rating}
+                  value={d.rating}
                   onChange={(e) => handleDraftChange(c._id, 'rating', e.target.value)}
-                  disabled={!isEditing}
                   className="w-32 border rounded p-2"
                 >
                   <option value="">Choose…</option>
@@ -135,26 +176,42 @@ const Feedback = () => {
                   <option value="4">4</option>
                   <option value="5">5</option>
                 </select>
+                {/* tiny hint if rating invalid */}
+                {d.rating !== '' && !ratingValid(d.rating) && (
+                  <span className="ml-2 text-sm text-red-600">Rating must be 1–5</span>
+                )}
               </div>
 
-              <div className="space-x-2">
-                {!isEditing ? (
-                  <button onClick={() => handleEdit(c._id)} className="px-4 py-2 bg-yellow-500 text-white rounded">
-                    Edit
-                  </button>
-                ) : (
-                  <>
-                    <button onClick={() => handleSave(c._id)} className="px-4 py-2 bg-green-600 text-white rounded">
-                      Save
-                    </button>
-                    <button onClick={() => handleCancel(c._id)} className="px-4 py-2 bg-gray-500 text-white rounded">
-                      Cancel
-                    </button>
-                  </>
-                )}
-                <button onClick={() => handleDelete(c._id)} className="px-4 py-2 bg-red-600 text-white rounded">
-                  Delete
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleSave(c._id)}
+                  disabled={!saveEnabled}
+                  className={`px-4 py-2 rounded text-white ${
+                    saveEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Save
                 </button>
+
+                <button
+                  onClick={() => cancelEnabled && handleCancel(c)}
+                  disabled={!cancelEnabled}
+                  className={`px-4 py-2 rounded text-white ${
+                    cancelEnabled ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                    onClick={() => deleteEnabled && handleDelete(c._id)}
+                    disabled={!deleteEnabled}
+                    className={`px-4 py-2 rounded text-white ${
+                        deleteEnabled ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'
+                    }`}
+                >
+                    Delete
+                </button>
+
               </div>
             </div>
           );
