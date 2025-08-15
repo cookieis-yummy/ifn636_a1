@@ -60,4 +60,67 @@ const deleteComplaint = async (req, res) => {
   }
 };
 
-module.exports = { getComplaints, addComplaint, updateComplaint, deleteComplaint };
+// List all closed complaints 
+const getClosedComplaints = async (req, res) => {
+  try {
+    const complaints = await Complaint.find({
+      userId: req.user.id,
+      status: 'closed',
+    }).sort({ date: -1 });
+    res.json(complaints);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Save and Update feedback 
+const saveFeedback = async (req, res) => {
+  try {
+    const { text, rating } = req.body;
+    const complaint = await Complaint.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
+
+    if (rating !== undefined) {
+      const num = Number(rating);
+      if (Number.isNaN(num) || num < 1 || num > 5) {
+        return res.status(400).json({ message: 'Rating must be an integer between 1 and 5' });
+      }
+      complaint.feedback = complaint.feedback || {};
+      complaint.feedback.rating = num;
+    }
+
+    if (text !== undefined) {
+      complaint.feedback = complaint.feedback || {};
+      complaint.feedback.text = String(text);
+    }
+
+    const updated = await complaint.save();
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete feedback
+const deleteFeedback = async (req, res) => {
+  try {
+    const complaint = await Complaint.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
+
+    complaint.feedback = undefined;
+    const updated = await complaint.save();
+    res.json(updated); // return updated complaint
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  getComplaints,
+  addComplaint,
+  updateComplaint,
+  deleteComplaint,
+  getClosedComplaints,
+  saveFeedback,
+  deleteFeedback,
+};
