@@ -1,94 +1,107 @@
-**Campus Complaint Management System**
+# Campus Complaint Management System
 
-**Overview:**
-A lightweight full-stack app for campuses to create, view, update, and delete complaints. It supports user access, status tracking, and post-resolution feedbacks and ratings. Designed for easy deployment to AWS EC2 with a public IP and quick local runs.
+A lightweight full-stack app for campuses to **create**, **view**, **update**, and **delete** complaints.  
+Supports user access, status tracking, post-resolution feedback, and ratings.  
+Easy to deploy on cloud or locally.
 
 ---
 
-**Project Setup Instructions**
+##  Quick Start
 
-1. **Clone** 
+### 1. Clone the Repo
 
+```bash
 git clone https://github.com/cookieis-yummy/ifn636_a1
-
 cd ifn636_a1
+```
 
-2. **(May requrie) Edit /backend/.env**
+### 2. Backend Setup
 
-MONGO_URI=<your_mongo_connection_string>
+- Edit `/backend/.env` (create if missing):
 
-JWT_SECRET=<your_jwt_secret>
+  ```
+  MONGO_URI=<your_mongo_connection_string>
+  JWT_SECRET=<your_jwt_secret>
+  PORT=5001
+  ```
 
-PORT=5001
+### 3. Frontend API URL
 
-4. **Open frontend/src/axiosConfig.jsx and set the API base URL** 
+- Open `frontend/src/axiosConfig.jsx` and set the API base URL:
 
-AWS EC2 (using your public IP):
+  **For AWS EC2 (public IP):**
+  ```js
+  export default axios.create({
+    baseURL: 'http://13.236.85.224', // live
+    headers: { 'Content-Type': 'application/json' },
+  });
+  ```
 
-export default axios.create({
+  **For Local Development (backend on port 5001):**
+  ```js
+  export default axios.create({
+    baseURL: 'http://localhost:5001', // local
+    headers: { 'Content-Type': 'application/json' },
+  });
+  ```
 
-  baseURL: 'http://13.236.85.224',   // live
- 
-  headers: { 'Content-Type': 'application/json' },
+### 4. Install Dependencies
 
-});
-
-
-Local development (backend on port 5001):
-
-// frontend/src/axiosConfig.jsx
-
-import axios from 'axios';
-
-export default axios.create({
-
-  baseURL: 'http://localhost:5001', //local
-
-  headers: { 'Content-Type': 'application/json' },
-
-});
-
-4. **Install dependencies for both backend and frontend**
-
+```bash
 npm run install-all
+```
 
-5. **Start backend and frontend**
+### 5. Start Backend & Frontend
 
-npm run 
-
-7. **Access the App via**
-
-**Current Live Version: http://13.236.85.224/**
-**OR**
-**Local:** http://localhost:3000 
-
-8. **Test Feedback Feature**
-Feedback feature will only be activated when the status is changed to **"closed"**, to test it, you **must login using below account**, or change the status to "closed" manually in Mongodb:
-* Login: feedback@test.com
-* Password: 1
+```bash
+npm run
+```
 
 ---
 
-**Key Features**
-* Secure sign-up / login, profile management
-* Create, view, update, delete own complaints with attachments
-* Post-resolution rating & comments
+##  Accessing the App
 
----
- **Tech Stack**
-* Frontend Developement: React.js
-* Backend Developement: Node.js + Express
-* Database: MongoDB
-* Auth: JWT
-* CI/CD Integration: GitHub
-* HTTP Client: Axios
+- **Live Version:** [http://13.236.85.224/](http://13.236.85.224/)
+- **Local:** [http://localhost:3000](http://localhost:3000)
 
 ---
 
-**Prerequisite: Please install the following software and create account in following web tools**
+##  Test Feedback Feature
 
-* Nodejs [https://nodejs.org/en]
-* Git [https://git-scm.com/]
-* VS code editor [https://code.visualstudio.com/]
-* MongoDB Account [https://account.mongodb.com/account/login] 
-* GitHub Account [https://github.com/signup?source=login]
+- Feedback is activated when status is set to **"closed"**
+- To test:
+  - Login with:
+    - **Email:** feedback@test.com
+    - **Password:** 1
+  - Or manually set complaint status to "closed" in MongoDB
+
+---
+
+##  Key Features
+
+- Secure sign-up / login, profile management
+- Create, view, update, delete own complaints with attachments
+- Post-resolution rating & comments
+
+---
+
+##  Tech Stack
+
+- **Frontend:** React.js
+- **Backend:** Node.js + Express
+- **Database:** MongoDB
+- **Auth:** JWT
+- **CI/CD:** GitHub
+- **HTTP Client:** Axios
+
+---
+
+##  Prerequisites
+
+Install and/or create accounts for:
+
+- [Node.js](https://nodejs.org/en)
+- [Git](https://git-scm.com/)
+- [VS Code](https://code.visualstudio.com/)
+- [MongoDB Account](https://account.mongodb.com/account/login)
+- [GitHub Account](https://github.com/signup?source=login)
