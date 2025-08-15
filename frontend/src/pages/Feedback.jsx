@@ -163,7 +163,7 @@ const Feedback = () => {
               </div>
 
               <div className="mb-3">
-                <label className="block text-sm font-medium mb-1">Rating</label>
+                <label className="block text-sm font-medium mb-1">Rating (1 = lowest, 5 = highest)</label>
                 <select
                   value={d.rating}
                   onChange={(e) => handleDraftChange(c._id, 'rating', e.target.value)}
