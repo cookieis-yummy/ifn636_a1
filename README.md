@@ -1,4 +1,3 @@
-
 **Campus Complaint Management System**
 
 **Overview:**
@@ -9,43 +8,61 @@ A lightweight full-stack app for campuses to create, view, update, and delete co
 **Project Setup Instructions**
 
 1. **Clone** 
+
 git clone https://github.com/cookieis-yummy/ifn636_a1
+
 cd ifn636_a1
 
 2. **(May requrie) Edit /backend/.env**
+
 MONGO_URI=<your_mongo_connection_string>
+
 JWT_SECRET=<your_jwt_secret>
+
 PORT=5001
 
-3. **Open frontend/src/axiosConfig.jsx and set the API base URL** 
-* AWS EC2 (using your public IP):
+4. **Open frontend/src/axiosConfig.jsx and set the API base URL** 
+
+AWS EC2 (using your public IP):
+
 export default axios.create({
-  baseURL: 'http://<PUBLIC_IP>:5001/api',   // quick test (no NGINX)
-  // baseURL: 'http://<PUBLIC_IP>/api',     // if serving via NGINX reverse proxy
+
+  baseURL: 'http://13.236.85.224',   // live
+ 
   headers: { 'Content-Type': 'application/json' },
+
 });
 
-* Local development (backend on port 5001):
+
+Local development (backend on port 5001):
+
 // frontend/src/axiosConfig.jsx
+
 import axios from 'axios';
 
 export default axios.create({
-  baseURL: 'http://localhost:5001/api',
+
+  baseURL: 'http://localhost:5001', //local
+
   headers: { 'Content-Type': 'application/json' },
+
 });
 
 4. **Install dependencies for both backend and frontend**
+
 npm run install-all
 
 5. **Start backend and frontend**
+
 npm run 
 
-6. **Access the App via**
-**Current Live Version:** http://<> 
+7. **Access the App via**
+
+**Current Live Version: http://13.236.85.224/**
 **OR**
 **Local:** http://localhost:3000 
 
-7. **Test Feedback Feature**
+8. **Test Feedback Feature**
 Feedback feature will only be activated when the status is changed to **"closed"**, to test it, you **must login using below account**, or change the status to "closed" manually in Mongodb:
 * Login: feedback@test.com
 * Password: 1
