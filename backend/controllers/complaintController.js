@@ -1,6 +1,6 @@
 const Complaint = require('../models/Complaint');
 
-// Get Complaints (READ)
+// READ
 const getComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({ userId: req.user.id });
@@ -10,7 +10,7 @@ const getComplaints = async (req, res) => {
   }
 };
 
-// Add Complaint (CREATE)
+// CREATE
 const addComplaint = async (req, res) => {
   const { title, description, date } = req.body;
   try {
@@ -18,7 +18,8 @@ const addComplaint = async (req, res) => {
       userId: req.user.id,
       title,
       description,
-      date, // status defaults in schema
+      date,
+      // status defaults in schema
     });
     res.status(201).json(complaint);
   } catch (error) {
@@ -26,17 +27,17 @@ const addComplaint = async (req, res) => {
   }
 };
 
-// Update Complaint (UPDATE)
+// UPDATE
 const updateComplaint = async (req, res) => {
   const { title, description, completed, date } = req.body;
   try {
     const complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
 
-    complaint.title = title || complaint.title;
-    complaint.description = description || complaint.description;
-    complaint.completed = (typeof completed === 'boolean') ? completed : complaint.completed;
-    complaint.date = date || complaint.date;
+    complaint.title = title ?? complaint.title;
+    complaint.description = description ?? complaint.description;
+    if (typeof completed === 'boolean') complaint.completed = completed;
+    complaint.date = date ?? complaint.date;
 
     const updated = await complaint.save();
     res.json(updated);
@@ -45,7 +46,7 @@ const updateComplaint = async (req, res) => {
   }
 };
 
-// Delete Complaint (DELETE)
+// DELETE
 const deleteComplaint = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id);
@@ -58,7 +59,7 @@ const deleteComplaint = async (req, res) => {
   }
 };
 
-// List all closed complaints
+// CLOSED LIST
 const getClosedComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({
@@ -71,19 +72,18 @@ const getClosedComplaints = async (req, res) => {
   }
 };
 
-// Save / Update feedback
+// SAVE/UPDATE FEEDBACK
 const saveFeedback = async (req, res) => {
   try {
     const { text, rating } = req.body;
-
-    const complaint = await Complaint.findOne({
-      _id: req.params.id,
-      userId: req.user.id,
-    });
+    const complaint = await Complaint.findOne({ _id: req.params.id, userId: req.user.id });
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
 
-    // Ensure subdoc exists
     complaint.feedback = complaint.feedback || {};
+
+    if (text !== undefined) {
+      complaint.feedback.text = String(text);
+    }
 
     if (rating !== undefined) {
       const num = Number(rating);
@@ -93,10 +93,6 @@ const saveFeedback = async (req, res) => {
       complaint.feedback.rating = num;
     }
 
-    if (text !== undefined) {
-      complaint.feedback.text = String(text);
-    }
-
     const updated = await complaint.save();
     res.json(updated);
   } catch (error) {
@@ -104,7 +100,7 @@ const saveFeedback = async (req, res) => {
   }
 };
 
-// Delete feedback
+// DELETE FEEDBACK
 const deleteFeedback = async (req, res) => {
   try {
     const complaint = await Complaint.findOne({ _id: req.params.id, userId: req.user.id });

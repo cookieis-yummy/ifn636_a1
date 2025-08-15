@@ -7,8 +7,8 @@ const Feedback = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [items, setItems] = useState([]);   // closed complaints from API
-  const [drafts, setDrafts] = useState({}); // { [id]: { text, rating } }
+  const [items, setItems] = useState([]);
+  const [drafts, setDrafts] = useState({});
   const [loading, setLoading] = useState(false);
 
   const fetchClosed = async () => {
@@ -19,8 +19,6 @@ const Feedback = () => {
       });
       const data = res.data || [];
       setItems(data);
-
-      // seed drafts from server values
       const init = {};
       data.forEach((c) => {
         init[c._id] = {
@@ -76,9 +74,7 @@ const Feedback = () => {
       const res = await axiosInstance.put(`/api/feedback/${id}`, body, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      // sync items
       setItems((arr) => arr.map((c) => (c._id === id ? res.data : c)));
-      // reset draft to saved values
       setDrafts((prev) => ({
         ...prev,
         [id]: {
@@ -125,10 +121,7 @@ const Feedback = () => {
     <div className="max-w-3xl mx-auto mt-10">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Feedback</h1>
-        <button
-          onClick={() => navigate('/complaints')}
-          className="px-4 py-2 bg-gray-700 text-white rounded"
-        >
+        <button onClick={() => navigate('/complaints')} className="px-4 py-2 bg-gray-700 text-white rounded">
           Back
         </button>
       </div>
@@ -141,22 +134,17 @@ const Feedback = () => {
           const dirty = isDirty(c);
           const saveEnabled = canSave(c);
           const cancelEnabled = dirty;
-          const deleteEnabled =
-            (drafts[c._id]?.text?.trim() || drafts[c._id]?.rating !== '');
+          const deleteEnabled = (drafts[c._id]?.text?.trim() || drafts[c._id]?.rating !== '');
 
           return (
             <div key={c._id} className="bg-white p-4 rounded shadow mb-4">
               <div className="mb-2">
                 <div className="font-semibold">{c.title}</div>
-                <div className="text-sm text-gray-500">
-                  Date: {formatDate(c.date)}
-                </div>
+                <div className="text-sm text-gray-500">Date: {formatDate(c.date)}</div>
               </div>
 
               <div className="mb-2">
-                <label className="block text-sm font-medium mb-1">
-                  Your feedback
-                </label>
+                <label className="block text-sm font-medium mb-1">Your feedback</label>
                 <textarea
                   value={d.text}
                   onChange={(e) => handleDraftChange(c._id, 'text', e.target.value)}
@@ -167,9 +155,7 @@ const Feedback = () => {
               </div>
 
               <div className="mb-3">
-                <label className="block text-sm font-medium mb-1">
-                  Rating (1 = lowest, 5 = highest)
-                </label>
+                <label className="block text-sm font-medium mb-1">Rating (1 = lowest, 5 = highest)</label>
                 <select
                   value={d.rating}
                   onChange={(e) => handleDraftChange(c._id, 'rating', e.target.value)}
@@ -183,9 +169,7 @@ const Feedback = () => {
                   <option value="5">5</option>
                 </select>
                 {d.rating !== '' && !ratingValid(d.rating) && (
-                  <span className="ml-2 text-sm text-red-600">
-                    Rating must be 1–5
-                  </span>
+                  <span className="ml-2 text-sm text-red-600">Rating must be 1–5</span>
                 )}
               </div>
 
@@ -194,9 +178,7 @@ const Feedback = () => {
                   onClick={() => handleSave(c._id)}
                   disabled={!saveEnabled}
                   className={`px-4 py-2 rounded text-white ${
-                    saveEnabled
-                      ? 'bg-green-600 hover:bg-green-700'
-                      : 'bg-gray-400 cursor-not-allowed'
+                    saveEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
                   }`}
                 >
                   Save
@@ -206,9 +188,7 @@ const Feedback = () => {
                   onClick={() => cancelEnabled && handleCancel(c)}
                   disabled={!cancelEnabled}
                   className={`px-4 py-2 rounded text-white ${
-                    cancelEnabled
-                      ? 'bg-gray-600 hover:bg-gray-700'
-                      : 'bg-gray-400 cursor-not-allowed'
+                    cancelEnabled ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-400 cursor-not-allowed'
                   }`}
                 >
                   Cancel
@@ -218,9 +198,7 @@ const Feedback = () => {
                   onClick={() => deleteEnabled && handleDelete(c._id)}
                   disabled={!deleteEnabled}
                   className={`px-4 py-2 rounded text-white ${
-                    deleteEnabled
-                      ? 'bg-red-600 hover:bg-red-700'
-                      : 'bg-gray-400 cursor-not-allowed'
+                    deleteEnabled ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'
                   }`}
                 >
                   Delete
