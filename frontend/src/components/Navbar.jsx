@@ -19,7 +19,6 @@ const Navbar = () => {
             <Link to="/complaints" className="mr-4">Complaint</Link>
             <Link to="/feedback" className="mr-4">Feedback</Link>
             <Link to="/profile" className="mr-4">Profile</Link>
-            <Link to="/feedback" className="mr-4">Feedback</Link>
             <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded hover:bg-red-700">Logout</button>
           </>
         ) : (
