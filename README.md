@@ -8,7 +8,7 @@ A lightweight full-stack app for campuses to create, view, update, and delete co
 
 **Project Setup Instructions**
 
-1. **Clone**
+1. **Clone** 
 git clone https://github.com/cookieis-yummy/ifn636_a1
 cd ifn636_a1
 
