@@ -1,4 +1,3 @@
-// backend/controllers/complaintController.js
 const Complaint = require('../models/Complaint');
 
 // Get Complaints (READ)
@@ -19,8 +18,7 @@ const addComplaint = async (req, res) => {
       userId: req.user.id,
       title,
       description,
-      date,
-      // status defaults in schema
+      date, // status defaults in schema
     });
     res.status(201).json(complaint);
   } catch (error) {
@@ -60,7 +58,7 @@ const deleteComplaint = async (req, res) => {
   }
 };
 
-// List closed complaints 
+// List all closed complaints
 const getClosedComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({
@@ -73,7 +71,7 @@ const getClosedComplaints = async (req, res) => {
   }
 };
 
-// Save feedback 
+// Save / Update feedback
 const saveFeedback = async (req, res) => {
   try {
     const { text, rating } = req.body;
@@ -84,12 +82,8 @@ const saveFeedback = async (req, res) => {
     });
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
 
-    // Create subdoc if missing
+    // Ensure subdoc exists
     complaint.feedback = complaint.feedback || {};
-
-    if (text !== undefined) {
-      complaint.feedback.text = String(text);
-    }
 
     if (rating !== undefined) {
       const num = Number(rating);
@@ -97,6 +91,10 @@ const saveFeedback = async (req, res) => {
         return res.status(400).json({ message: 'Rating must be an integer between 1 and 5' });
       }
       complaint.feedback.rating = num;
+    }
+
+    if (text !== undefined) {
+      complaint.feedback.text = String(text);
     }
 
     const updated = await complaint.save();
@@ -109,10 +107,7 @@ const saveFeedback = async (req, res) => {
 // Delete feedback
 const deleteFeedback = async (req, res) => {
   try {
-    const complaint = await Complaint.findOne({
-      _id: req.params.id,
-      userId: req.user.id,
-    });
+    const complaint = await Complaint.findOne({ _id: req.params.id, userId: req.user.id });
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
 
     complaint.feedback = undefined;
@@ -123,5 +118,12 @@ const deleteFeedback = async (req, res) => {
   }
 };
 
-
-module.exports = { getComplaints, addComplaint, updateComplaint, deleteComplaint, getClosedComplaints, saveFeedback, deleteFeedback, };
+module.exports = {
+  getComplaints,
+  addComplaint,
+  updateComplaint,
+  deleteComplaint,
+  getClosedComplaints,
+  saveFeedback,
+  deleteFeedback,
+};
