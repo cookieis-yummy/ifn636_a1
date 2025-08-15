@@ -11,6 +11,7 @@ const complaintSchema = new mongoose.Schema({
     enum: ['received', 'resolving', 'closed'],
     default: 'received',
   },
+  photos: [{ type: String }],
   feedback: {
     text: { type: String, default: '' },
     rating: { type: Number, min: 1, max: 5 },

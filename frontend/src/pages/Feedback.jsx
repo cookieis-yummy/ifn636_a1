@@ -7,8 +7,8 @@ const Feedback = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [items, setItems] = useState([]);   // closed complaints from API
-  const [drafts, setDrafts] = useState({}); // { [id]: { text, rating } }
+  const [items, setItems] = useState([]);
+  const [drafts, setDrafts] = useState({});
   const [loading, setLoading] = useState(false);
 
   const fetchClosed = async () => {
@@ -19,7 +19,6 @@ const Feedback = () => {
       });
       const data = res.data || [];
       setItems(data);
-      // seed drafts from server values
       const init = {};
       data.forEach((c) => {
         init[c._id] = {
@@ -48,7 +47,6 @@ const Feedback = () => {
     const d = drafts[c._id] || {};
     const baseText = c.feedback?.text || '';
     const baseRating = c.feedback?.rating ?? '';
-    // compare as strings to avoid undefined vs '' weirdness
     return String(d.text ?? '') !== String(baseText) ||
            String(d.rating ?? '') !== String(baseRating);
   };
@@ -61,8 +59,6 @@ const Feedback = () => {
 
   const canSave = (c) => {
     const d = drafts[c._id] || {};
-    // Enable save if ANY change (text or rating) AND rating is empty-or-valid.
-    // If you want rating to be required, change `ratingValid` check accordingly.
     const dirty = isDirty(c);
     const ratingOk = d.rating === '' || ratingValid(d.rating);
     return dirty && ratingOk;
@@ -78,9 +74,7 @@ const Feedback = () => {
       const res = await axiosInstance.put(`/api/feedback/${id}`, body, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      // sync items
       setItems((arr) => arr.map((c) => (c._id === id ? res.data : c)));
-      // reset draft to saved values
       setDrafts((prev) => ({
         ...prev,
         [id]: {
@@ -94,7 +88,6 @@ const Feedback = () => {
   };
 
   const handleCancel = (c) => {
-    // revert draft back to server values
     setDrafts((prev) => ({
       ...prev,
       [c._id]: {
@@ -143,7 +136,6 @@ const Feedback = () => {
           const cancelEnabled = dirty;
           const deleteEnabled = (drafts[c._id]?.text?.trim() || drafts[c._id]?.rating !== '');
 
-
           return (
             <div key={c._id} className="bg-white p-4 rounded shadow mb-4">
               <div className="mb-2">
@@ -176,7 +168,6 @@ const Feedback = () => {
                   <option value="4">4</option>
                   <option value="5">5</option>
                 </select>
-                {/* tiny hint if rating invalid */}
                 {d.rating !== '' && !ratingValid(d.rating) && (
                   <span className="ml-2 text-sm text-red-600">Rating must be 1–5</span>
                 )}
@@ -202,16 +193,16 @@ const Feedback = () => {
                 >
                   Cancel
                 </button>
-                <button
-                    onClick={() => deleteEnabled && handleDelete(c._id)}
-                    disabled={!deleteEnabled}
-                    className={`px-4 py-2 rounded text-white ${
-                        deleteEnabled ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'
-                    }`}
-                >
-                    Delete
-                </button>
 
+                <button
+                  onClick={() => deleteEnabled && handleDelete(c._id)}
+                  disabled={!deleteEnabled}
+                  className={`px-4 py-2 rounded text-white ${
+                    deleteEnabled ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Delete
+                </button>
               </div>
             </div>
           );

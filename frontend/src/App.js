@@ -7,7 +7,6 @@ import Complaints from './pages/Complaints';
 import Feedback from './pages/Feedback';
 import Home from './pages/Home';
 
-
 function App() {
   return (
     <Router>

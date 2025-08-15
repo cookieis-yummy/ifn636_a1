@@ -1,7 +1,6 @@
-// backend/controllers/complaintController.js
 const Complaint = require('../models/Complaint');
 
-// Get Complaints (READ)
+// READ
 const getComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({ userId: req.user.id });
@@ -11,7 +10,7 @@ const getComplaints = async (req, res) => {
   }
 };
 
-// Add Complaint (CREATE)
+// CREATE
 const addComplaint = async (req, res) => {
   const { title, description, date } = req.body;
   try {
@@ -28,17 +27,17 @@ const addComplaint = async (req, res) => {
   }
 };
 
-// Update Complaint (UPDATE)
+// UPDATE
 const updateComplaint = async (req, res) => {
   const { title, description, completed, date } = req.body;
   try {
     const complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
 
-    complaint.title = title || complaint.title;
-    complaint.description = description || complaint.description;
-    complaint.completed = (typeof completed === 'boolean') ? completed : complaint.completed;
-    complaint.date = date || complaint.date;
+    complaint.title = title ?? complaint.title;
+    complaint.description = description ?? complaint.description;
+    if (typeof completed === 'boolean') complaint.completed = completed;
+    complaint.date = date ?? complaint.date;
 
     const updated = await complaint.save();
     res.json(updated);
@@ -47,7 +46,7 @@ const updateComplaint = async (req, res) => {
   }
 };
 
-// Delete Complaint (DELETE)
+// DELETE
 const deleteComplaint = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id);
@@ -60,7 +59,7 @@ const deleteComplaint = async (req, res) => {
   }
 };
 
-// List all closed complaints 
+// CLOSED LIST
 const getClosedComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({
@@ -73,25 +72,25 @@ const getClosedComplaints = async (req, res) => {
   }
 };
 
-// Save and Update feedback 
+// SAVE/UPDATE FEEDBACK
 const saveFeedback = async (req, res) => {
   try {
     const { text, rating } = req.body;
     const complaint = await Complaint.findOne({ _id: req.params.id, userId: req.user.id });
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
 
-    if (rating !== undefined) {
-      const num = Number(rating);
-      if (Number.isNaN(num) || num < 1 || num > 5) {
-        return res.status(400).json({ message: 'Rating must be an integer between 1 and 5' });
-      }
-      complaint.feedback = complaint.feedback || {};
-      complaint.feedback.rating = num;
-    }
+    complaint.feedback = complaint.feedback || {};
 
     if (text !== undefined) {
-      complaint.feedback = complaint.feedback || {};
       complaint.feedback.text = String(text);
+    }
+
+    if (rating !== undefined) {
+      const num = Number(rating);
+      if (!Number.isInteger(num) || num < 1 || num > 5) {
+        return res.status(400).json({ message: 'Rating must be an integer between 1 and 5' });
+      }
+      complaint.feedback.rating = num;
     }
 
     const updated = await complaint.save();
@@ -101,7 +100,7 @@ const saveFeedback = async (req, res) => {
   }
 };
 
-// Delete feedback
+// DELETE FEEDBACK
 const deleteFeedback = async (req, res) => {
   try {
     const complaint = await Complaint.findOne({ _id: req.params.id, userId: req.user.id });
@@ -109,7 +108,7 @@ const deleteFeedback = async (req, res) => {
 
     complaint.feedback = undefined;
     const updated = await complaint.save();
-    res.json(updated); // return updated complaint
+    res.json(updated);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
